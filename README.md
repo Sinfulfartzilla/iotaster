@@ -20,6 +20,6 @@ https://github.com/RoboticsBrno/ESP32-Arduino-Servo-Library/
 I followed these instructions too:
 https://randomnerdtutorials.com/esp32-servo-motor-web-server-arduino-ide/
 
-I would recommend working with orig 
+I would recommend working with original file.  The ALT may or may not compile
 
                                  
