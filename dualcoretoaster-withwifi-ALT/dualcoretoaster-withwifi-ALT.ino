@@ -16,11 +16,11 @@ typedef struct
 Servo vexmotor;
 TaskHandle_t Task1;
 TaskHandle_t Task2;
-bool powerstate = false;
-int pos = 0;
+bool powerstate = false;  //this is whether or not the toaster is on or off
+int pos = 0;  //this is used for the vex mc29 motor controller value
 
 int usetime;
-
+bool remember = false;
 
 // Replace with your network credentials
 const char* ssid     = "Pretty Fly for a Wi-Fi";
@@ -96,7 +96,7 @@ bool push(STACK* pStack, int time2)
   return success;
 }
 
-bool pop(STACK* pStack, int* dataOut)
+int pop(STACK* pStack)
 {
   STACK_NODE* pDlt;
   bool success;
@@ -112,13 +112,23 @@ bool pop(STACK* pStack, int* dataOut)
   }
   else
     success = false;
-  return success;
+  return usetime;
 }
 
 
 
 //Task1code: toaster controller
 void Task1code( void * pvParameters ) {
+  //STACK* pStack;
+  //pStack->top = NULL;
+  //pStack->count = 0;
+  //pStack = (STACK*)malloc(sizeof(STACK));
+  //if (!pStack)
+  //printf("error allocating stack"), exit(101);
+
+
+
+
   Serial.print("Task1 running on core ");
   Serial.println(xPortGetCoreID());
   for (;;) {
@@ -130,6 +140,18 @@ void Task1code( void * pvParameters ) {
         pos = 170; //stop motor
       }
       delay(15);
+      if (remember == false) {
+        usetime += 1;
+      } else {
+        usetime -= 1;
+      }
+
+      if (usetime == -1) {
+        powerstate = false;
+      }
+
+      Serial.println(usetime);
+      //updatedata = false;
     }
     if (powerstate == false) {  //toaster off code
       if (digitalRead(15) != 0)
@@ -141,16 +163,27 @@ void Task1code( void * pvParameters ) {
         digitalWrite(led1, HIGH);
       }
       delay(15);
+      //if (updatedata == true)
+      //{
+      //  push(pStack, usetime);
+      //}
+      Serial.println(usetime);
+      //Serial.println("this is what is stored in the stack");
+      //Serial.println(pop(pStack));
+
+
     }
     vexmotor.write(pos);  //send the value to the motor controller
   }
 }
 //Task2code: blinks an LED every 700 ms
 
-int updatedata = 0;
-int timecount = 0;
+
 
 void Task2code( void * pvParameters ) {
+
+
+
   Serial.print("Task2 running on core ");
   Serial.println(xPortGetCoreID());
 
@@ -179,22 +212,14 @@ void Task2code( void * pvParameters ) {
               // turns the GPIOs on and off
               if (header.indexOf("GET /toast/on") >= 0) {
                 Serial.println("power state is not set to on");
-                updatedata = 1;
                 powerstate = true;
-                delay(500);
-                timecount = timecount + 1;
-                Serial.print(timecount);
-
               } else if (header.indexOf("GET /toast/off") >= 0) {
                 Serial.println("powerstate is now set to off");
                 powerstate = false;
-                printf("\nnigger\n%d", timecount);
-                //
-              }  else if (header.indexOf("GET /27/on") >= 0) {
-                Serial.println("GPIO 27 on");
-              } else if (header.indexOf("GET /27/off") >= 0) {
-                Serial.println("GPIO 27 off");
-                powerstate = false;
+              }  else if (header.indexOf("GET /replay/on") >= 0) {
+                remember = true;
+              } else if (header.indexOf("GET /replay/off") >= 0) {
+                remember = false;
               }
 
               // Display the HTML web page
@@ -210,17 +235,14 @@ void Task2code( void * pvParameters ) {
               // Web Page Heading
               client.println("<body><h1>Toast Control:</h1>");
               if (powerstate == false) {
-                client.println("<p><a href=\"/toast/on\"><button class=\"button\">ON</button></a></p>");
+                client.println("<p><a href=\"/toast/on\"><button class=\"button button2\">OFF</button></a></p>");
               } else {
-                client.println("<p><a href=\"/toast/off\"><button class=\"button button2\">OFF</button></a></p>");
+                client.println("<p><a href=\"/toast/off\"><button class=\"button \">ON</button></a></p>");
               }
-              // Display current state, and ON/OFF buttons for GPIO 27
-              //client.println("<p>GPIO 27 - State " + output27State + "</p>");
-              // If the output27State is off, it displays the ON button
               if (powerstate == false) {
-                client.println("<p><a href=\"/27/on\"><button class=\"button\">repeat</button></a></p>");
+                client.println("<p><a href=\"/replay/on\"><button class=\"button\">repeat</button></a></p>");
               } else {
-                client.println("<p><a href=\"/27/off\"><button class=\"button button2\">STOP!</button></a></p>");
+                client.println("<p><a href=\"/replay/off\"><button class=\"button button2\">STOP!</button></a></p>");
               }
               client.println("</body></html>");
 
