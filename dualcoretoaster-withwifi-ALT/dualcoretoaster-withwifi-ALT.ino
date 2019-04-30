@@ -1,16 +1,32 @@
 #include <Servo.h>
 #include <WiFi.h>
 
+typedef struct node
+{
+    int timez;
+    struct node* link;
+} STACK_NODE;
+typedef struct
+{
+    int count;
+    struct node* top;
+} STACK;
+
+
 Servo vexmotor;
 TaskHandle_t Task1;
 TaskHandle_t Task2;
 bool powerstate = false;
 int pos = 0;
 
+int usetime;
+
+
 // Replace with your network credentials
 const char* ssid     = "Pretty Fly for a Wi-Fi";
 const char* password = "livelycartoon963";
 
+int timerthing;
 // LED pins
 const int led1 = 2;
 
@@ -61,6 +77,46 @@ void setup() {
     1);          /* pin task to core 1 */
   delay(500);
 }
+
+
+bool push(STACK* pStack, int time2)
+{
+    STACK_NODE* pNew;
+    bool success;
+
+    pNew = (STACK_NODE*)malloc(sizeof (STACK_NODE));
+    if (!pNew)
+        success = false;
+    else
+    {
+        pNew->timez = time2;
+
+        success=true;
+    }
+    return success;
+}
+
+bool pop(STACK* pStack, int* dataOut)
+{
+    STACK_NODE* pDlt;
+    bool success;
+    printf("\n");
+    if (pStack->top)
+    {
+        success = true;
+        usetime = pStack->top->timez;
+        //printf( "%s, %s, %d, %d\n", pStack->top->firstName, pStack->top->lastName, pStack->top->PUID, pStack->top->AGE);
+        pDlt = pStack->top;
+        pStack->top = (pStack->top)->link;
+        pStack->count--;
+        free (pDlt);
+    }
+    else
+        success = false;
+    return success;
+}
+
+
 
 //Task1code: toaster controller
 void Task1code( void * pvParameters ) {
@@ -156,15 +212,14 @@ void Task2code( void * pvParameters ) {
               } else {
                 client.println("<p><a href=\"/26/off\"><button class=\"button button2\">OFF</button></a></p>");
               }
-              //sample portion to base new parts of code off of
-              //              // Display current state, and ON/OFF buttons for GPIO 27
-              //              client.println("<p>GPIO 27 - State " + output27State + "</p>");
-              //              // If the output27State is off, it displays the ON button
-              //              if (output27State == "off") {
-              //                client.println("<p><a href=\"/27/on\"><button class=\"button\">ON</button></a></p>");
-              //              } else {
-              //                client.println("<p><a href=\"/27/off\"><button class=\"button button2\">OFF</button></a></p>");
-              //              }
+//                            // Display current state, and ON/OFF buttons for GPIO 27
+//                            //client.println("<p>GPIO 27 - State " + output27State + "</p>");
+//                            // If the output27State is off, it displays the ON button
+//                            if (output27State == "off") {
+//                              client.println("<p><a href=\"/27/on\"><button class=\"button\">ON</button></a></p>");
+//                            } else {
+//                              client.println("<p><a href=\"/27/off\"><button class=\"button button2\">OFF</button></a></p>");
+//                            }
               client.println("</body></html>");
 
               // The HTTP response ends with another blank line
