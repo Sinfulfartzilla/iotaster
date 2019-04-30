@@ -22,4 +22,8 @@ https://randomnerdtutorials.com/esp32-servo-motor-web-server-arduino-ide/
 
 I would recommend working with original file.  The ALT may or may not compile
 
+Credit 
  lhiday                                
+ bkallmye
+ adams224
+ 
