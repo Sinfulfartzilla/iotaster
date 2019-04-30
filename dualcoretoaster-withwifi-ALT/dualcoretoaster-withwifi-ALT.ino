@@ -3,13 +3,13 @@
 
 typedef struct node
 {
-    int timez;
-    struct node* link;
+  int timez;
+  struct node* link;
 } STACK_NODE;
 typedef struct
 {
-    int count;
-    struct node* top;
+  int count;
+  struct node* top;
 } STACK;
 
 
@@ -81,39 +81,38 @@ void setup() {
 
 bool push(STACK* pStack, int time2)
 {
-    STACK_NODE* pNew;
-    bool success;
+  STACK_NODE* pNew;
+  bool success;
 
-    pNew = (STACK_NODE*)malloc(sizeof (STACK_NODE));
-    if (!pNew)
-        success = false;
-    else
-    {
-        pNew->timez = time2;
+  pNew = (STACK_NODE*)malloc(sizeof (STACK_NODE));
+  if (!pNew)
+    success = false;
+  else
+  {
+    pNew->timez = time2;
 
-        success=true;
-    }
-    return success;
+    success = true;
+  }
+  return success;
 }
 
 bool pop(STACK* pStack, int* dataOut)
 {
-    STACK_NODE* pDlt;
-    bool success;
-    printf("\n");
-    if (pStack->top)
-    {
-        success = true;
-        usetime = pStack->top->timez;
-        //printf( "%s, %s, %d, %d\n", pStack->top->firstName, pStack->top->lastName, pStack->top->PUID, pStack->top->AGE);
-        pDlt = pStack->top;
-        pStack->top = (pStack->top)->link;
-        pStack->count--;
-        free (pDlt);
-    }
-    else
-        success = false;
-    return success;
+  STACK_NODE* pDlt;
+  bool success;
+  printf("\n");
+  if (pStack->top)
+  {
+    success = true;
+    usetime = pStack->top->timez;
+    pDlt = pStack->top;
+    pStack->top = (pStack->top)->link;
+    pStack->count--;
+    free (pDlt);
+  }
+  else
+    success = false;
+  return success;
 }
 
 
@@ -147,6 +146,10 @@ void Task1code( void * pvParameters ) {
   }
 }
 //Task2code: blinks an LED every 700 ms
+
+int updatedata = 0;
+int timecount = 0;
+
 void Task2code( void * pvParameters ) {
   Serial.print("Task2 running on core ");
   Serial.println(xPortGetCoreID());
@@ -174,21 +177,25 @@ void Task2code( void * pvParameters ) {
               client.println();
 
               // turns the GPIOs on and off
-              if (header.indexOf("GET /26/on") >= 0) {
+              if (header.indexOf("GET /toast/on") >= 0) {
                 Serial.println("power state is not set to on");
+                updatedata = 1;
                 powerstate = true;
-              } else if (header.indexOf("GET /26/off") >= 0) {
+                delay(500);
+                timecount = timecount + 1;
+                Serial.print(timecount);
+
+              } else if (header.indexOf("GET /toast/off") >= 0) {
                 Serial.println("powerstate is now set to off");
                 powerstate = false;
-              }// else if (header.indexOf("GET /27/on") >= 0) {
-              //                Serial.println("GPIO 27 on");
-              ////                output27State = "on";
-              ////                digitalWrite(output27, HIGH);
-              //              } else if (header.indexOf("GET /27/off") >= 0) {
-              //                Serial.println("GPIO 27 off");
-              ////                output27State = "off";
-              ////                digitalWrite(output27, LOW);
-              //              }
+                printf("\nnigger\n%d", timecount);
+                //
+              }  else if (header.indexOf("GET /27/on") >= 0) {
+                Serial.println("GPIO 27 on");
+              } else if (header.indexOf("GET /27/off") >= 0) {
+                Serial.println("GPIO 27 off");
+                powerstate = false;
+              }
 
               // Display the HTML web page
               client.println("<!DOCTYPE html><html>");
@@ -202,24 +209,19 @@ void Task2code( void * pvParameters ) {
 
               // Web Page Heading
               client.println("<body><h1>Toast Control:</h1>");
-
-              // Display current state, and ON/OFF buttons for GPIO 26
-              //client.println("<p>GPIO 26 - State " + output26State + "</p>");
-              //+++client.println("<p>GPIO 26 - State " + powerstate + "</p>");
-              // If the output26State is off, it displays the ON button
               if (powerstate == false) {
-                client.println("<p><a href=\"/26/on\"><button class=\"button\">ON</button></a></p>");
+                client.println("<p><a href=\"/toast/on\"><button class=\"button\">ON</button></a></p>");
               } else {
-                client.println("<p><a href=\"/26/off\"><button class=\"button button2\">OFF</button></a></p>");
+                client.println("<p><a href=\"/toast/off\"><button class=\"button button2\">OFF</button></a></p>");
               }
-//                            // Display current state, and ON/OFF buttons for GPIO 27
-//                            //client.println("<p>GPIO 27 - State " + output27State + "</p>");
-//                            // If the output27State is off, it displays the ON button
-//                            if (output27State == "off") {
-//                              client.println("<p><a href=\"/27/on\"><button class=\"button\">ON</button></a></p>");
-//                            } else {
-//                              client.println("<p><a href=\"/27/off\"><button class=\"button button2\">OFF</button></a></p>");
-//                            }
+              // Display current state, and ON/OFF buttons for GPIO 27
+              //client.println("<p>GPIO 27 - State " + output27State + "</p>");
+              // If the output27State is off, it displays the ON button
+              if (powerstate == false) {
+                client.println("<p><a href=\"/27/on\"><button class=\"button\">repeat</button></a></p>");
+              } else {
+                client.println("<p><a href=\"/27/off\"><button class=\"button button2\">STOP!</button></a></p>");
+              }
               client.println("</body></html>");
 
               // The HTTP response ends with another blank line
