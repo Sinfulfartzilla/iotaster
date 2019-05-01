@@ -119,14 +119,16 @@ int pop(STACK* pStack)
 
 //Task1code: toaster controller
 void Task1code( void * pvParameters ) {
-  //STACK* pStack;
-  //pStack->top = NULL;
-  //pStack->count = 0;
-  //pStack = (STACK*)malloc(sizeof(STACK));
-  //if (!pStack)
-  //printf("error allocating stack"), exit(101);
+  STACK* pStack;
+  pStack = (STACK*)malloc(sizeof(STACK));
+  if (!pStack){
+    printf("error allocating stack"); 
+    exit(101);
+  }
+  pStack->top = NULL;
+  pStack->count = 0;
 
-
+  bool updatedata;
 
 
   Serial.print("Task1 running on core ");
@@ -151,7 +153,7 @@ void Task1code( void * pvParameters ) {
       }
 
       Serial.println(usetime);
-      //updatedata = false;
+      updatedata = false;
     }
     if (powerstate == false) {  //toaster off code
       if (digitalRead(15) != 0)
@@ -163,10 +165,10 @@ void Task1code( void * pvParameters ) {
         digitalWrite(led1, HIGH);
       }
       delay(15);
-      //if (updatedata == true)
-      //{
-      //  push(pStack, usetime);
-      //}
+      if (updatedata == true)
+      {
+        push(pStack, usetime);
+      }
       Serial.println(usetime);
       //Serial.println("this is what is stored in the stack");
       //Serial.println(pop(pStack));
